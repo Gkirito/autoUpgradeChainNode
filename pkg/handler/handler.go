@@ -54,6 +54,13 @@ func GetKeyword[T Message](msg T, KeyWordRegexp string) (string, error) {
 }
 
 func MsgHandler[T Message](runner node_runner.Runner, msg T, KeyWordRegexp string, send func(T, string)) {
+	newInfo, err := GetKeyword(msg, KeyWordRegexp)
+	if err != nil {
+		log.Infof("cannot find keyword")
+		return
+	}
+	log.Infof("get new info: %s", newInfo)
+
 	log.Infoln("start stop the node")
 	stopLog, err := runner.Stop()
 	if err != nil {
@@ -63,13 +70,6 @@ func MsgHandler[T Message](runner node_runner.Runner, msg T, KeyWordRegexp strin
 	}
 	send(msg, stopLog)
 	log.Infoln("node stop success")
-
-	newInfo, err := GetKeyword(msg, KeyWordRegexp)
-	if err != nil {
-		log.Error(err)
-		send(msg, err.Error())
-		return
-	}
 
 	err = runner.Upgrade(newInfo)
 	if err != nil {
