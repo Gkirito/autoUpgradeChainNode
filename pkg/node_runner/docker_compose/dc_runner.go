@@ -2,7 +2,6 @@ package docker_compose
 
 import (
 	"bytes"
-	"errors"
 	"gkirito.com/autoUpgradeChainNode/pkg/update"
 	"os/exec"
 )
@@ -22,15 +21,11 @@ func NewDcRunner(composeFilePath string) *DcRunner {
 func cmd(name string, args ...string) (string, error) {
 	stop := exec.Command(name, args...)
 	cmdLog := bytes.NewBuffer([]byte{})
-	cmdErrLog := bytes.NewBuffer([]byte{})
 	stop.Stdout = cmdLog
-	stop.Stderr = cmdErrLog
+	stop.Stderr = cmdLog
 	err := stop.Run()
 	if err != nil {
 		return "", err
-	}
-	if cmdErrLog.Len() > 0 {
-		return "", errors.New(cmdErrLog.String())
 	}
 	return cmdLog.String(), nil
 }
