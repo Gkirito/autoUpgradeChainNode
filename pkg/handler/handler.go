@@ -15,19 +15,28 @@ type Message interface {
 	~*discordgo.MessageCreate
 }
 
-type Handler[T Message] func(runner node_runner.Runner, msg T, KeyWordRegexp string, send func(T, string))
+type Handler[T Message] func(logger *log.Entry, runner node_runner.Runner, msg T, KeyWordRegexp string, send func(T, string))
 
-func (m Handler[T]) Discord(runner node_runner.Runner, channel, KeyWordRegexp string, send func(T, string)) func(session *discordgo.Session, msg *discordgo.MessageCreate) {
+func (h Handler[T]) Discord(runner node_runner.Runner, channel, KeyWordRegexp string, send func(T, string)) func(session *discordgo.Session, msg *discordgo.MessageCreate) {
+	logger := log.WithField("handler", "discord")
 	return func(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		if msg.ChannelID != channel {
 			return
 		}
-		log.Infof("receive the message from disocrd channel[%s] msgId[%s] content: \n %s", msg.ChannelID, msg.ID, msg.Content)
-		m(runner, msg, KeyWordRegexp, send)
+		logger.Infof("receive the message from disocrd channel[%s] msgId[%s] content: \n %s", msg.ChannelID, msg.ID, msg.Content)
+		h(logger, runner, msg, KeyWordRegexp, send)
 	}
 }
 
-func GetKeyword[T Message](msg T, KeyWordRegexp string) (string, error) {
+func GetMsgInfo[T Message](msg T) (string, string, error) {
+	if message, ok := any(msg).(*discordgo.MessageCreate); ok {
+		return message.ID, message.Content, nil
+	} else {
+		return "", "", errors.New("unsupported message")
+	}
+}
+
+func GetKeyword(msg, KeyWordRegexp string) (string, error) {
 	rp := strings.Split(KeyWordRegexp, "|")
 	if len(rp) != 2 {
 		return "", errors.New("the keyword regexp must use '|' to split the regexp and result index")
@@ -40,51 +49,51 @@ func GetKeyword[T Message](msg T, KeyWordRegexp string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var content string
-	if message, ok := any(msg).(*discordgo.MessageCreate); ok {
-		content = message.Content
-	} else {
-		return "", errors.New("unsupported message")
-	}
-	findResult := rep.FindStringSubmatch(content)
+	findResult := rep.FindStringSubmatch(msg)
 	if int64(len(findResult)) < resultIndex {
 		return "", fmt.Errorf("the keyword index is range out of %d", resultIndex)
 	}
 	return findResult[resultIndex], nil
 }
 
-func MsgHandler[T Message](runner node_runner.Runner, msg T, KeyWordRegexp string, send func(T, string)) {
-	newInfo, err := GetKeyword(msg, KeyWordRegexp)
+func MsgHandler[T Message](logger *log.Entry, runner node_runner.Runner, msg T, KeyWordRegexp string, send func(T, string)) {
+	id, content, err := GetMsgInfo(msg)
 	if err != nil {
-		log.Infof("cannot find keyword")
+		logger.Error("got msg info err: %v", err)
 		return
 	}
-	log.Infof("get new info: %s", newInfo)
+	msgLogger := logger.WithField("message", id)
+	newInfo, err := GetKeyword(content, KeyWordRegexp)
+	if err != nil {
+		msgLogger.Infof("cannot find keyword")
+		return
+	}
+	msgLogger.Infof("get new info: %s", newInfo)
 
-	log.Infoln("start stop the node")
+	msgLogger.Infoln("start stop the node")
 	stopLog, err := runner.Stop()
 	if err != nil {
-		log.Error(err)
+		msgLogger.Error(err)
 		send(msg, err.Error())
 		return
 	}
 	send(msg, stopLog)
-	log.Infoln("node stop success")
+	msgLogger.Infoln("node stop success")
 
 	err = runner.Upgrade(newInfo)
 	if err != nil {
-		log.Error(err)
+		msgLogger.Error(err)
 		send(msg, err.Error())
 		return
 	}
-	log.Infoln("update success")
+	msgLogger.Infoln("update success")
 
 	startLog, err := runner.Start()
 	if err != nil {
-		log.Error(err)
+		msgLogger.Error(err)
 		send(msg, err.Error())
 		return
 	}
 	send(msg, startLog)
-	log.Infoln("restart success")
+	msgLogger.Infoln("restart success")
 }
