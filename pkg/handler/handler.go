@@ -28,9 +28,9 @@ func (m Handler[T]) Discord(runner node_runner.Runner, channel, KeyWordRegexp st
 }
 
 func GetKeyword[T Message](msg T, KeyWordRegexp string) (string, error) {
-	rp := strings.Split(KeyWordRegexp, ":")
+	rp := strings.Split(KeyWordRegexp, "|")
 	if len(rp) != 2 {
-		return "", errors.New("the keyword regexp must use ':' to split the regexp and result index")
+		return "", errors.New("the keyword regexp must use '|' to split the regexp and result index")
 	}
 	resultIndex, err := strconv.ParseInt(rp[1], 10, 64)
 	if err != nil {
