@@ -17,8 +17,12 @@ type Message interface {
 
 type Handler[T Message] func(runner node_runner.Runner, msg T, KeyWordRegexp string, send func(T, string))
 
-func (m Handler[T]) Discord(runner node_runner.Runner, KeyWordRegexp string, send func(T, string)) func(session *discordgo.Session, msg *discordgo.MessageCreate) {
+func (m Handler[T]) Discord(runner node_runner.Runner, channel, KeyWordRegexp string, send func(T, string)) func(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	return func(session *discordgo.Session, msg *discordgo.MessageCreate) {
+		if msg.ChannelID != channel {
+			return
+		}
+		log.Infof("receive the message from disocrd channel[%s] msgId[%s] content: \n %s", msg.ChannelID, msg.ID, msg.Content)
 		m(runner, msg, KeyWordRegexp, send)
 	}
 }

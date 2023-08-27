@@ -8,5 +8,5 @@ import (
 type Listener[T handler.Message] interface {
 	Send(relayMsg T, msg string)
 	Start() error
-	AddMsgHandler(runner node_runner.Runner, KeyWordRegexp string, handel handler.Handler[T])
+	AddMsgHandler(runner node_runner.Runner, channel, KeyWordRegexp string, handel handler.Handler[T])
 }

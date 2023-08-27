@@ -14,6 +14,7 @@ import (
 var (
 	ListenType      string
 	DiscordBotToken string
+	Channel         string
 	KeyWordRegexp   string
 	RunnerType      string
 	DCPath          string
@@ -30,6 +31,7 @@ func init() {
 	flag.StringVar(&RunnerType, "rt", "docker-compose", "set node runner type: docker-compose | systemd")
 	flag.StringVar(&DCPath, "dcp", "./docker-compose.yaml", "set docker compose path, defual: ./docker-compose.yaml")
 	flag.StringVar(&SystemdName, "sn", "", "set systemd name")
+	flag.StringVar(&Channel, "cl", "", "set message channel")
 }
 
 func main() {
@@ -42,18 +44,19 @@ func main() {
 			log.Error(err)
 			return
 		}
-		l.AddMsgHandler(runner, KeyWordRegexp, handler.MsgHandler[*discordgo.MessageCreate])
+		l.AddMsgHandler(runner, Channel, KeyWordRegexp, handler.MsgHandler[*discordgo.MessageCreate])
 		err = l.Start()
 		if err != nil {
 			log.Error(err)
 			return
 		}
 	}
+	log.Infoln("aucn start ==========>")
 	osSignal := make(chan os.Signal, 1)
 	signal.Notify(osSignal, os.Kill, os.Interrupt)
 	select {
 	case <-osSignal:
-		log.Infoln("exit")
+		log.Infoln("aucn exit <==========")
 		return
 	}
 }

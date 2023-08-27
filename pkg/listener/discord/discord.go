@@ -25,8 +25,8 @@ func NewDiscord(token string) (*Discord[*discordgo.MessageCreate], error) {
 	}, nil
 }
 
-func (d *Discord[T]) AddMsgHandler(runner node_runner.Runner, KeyWordRegexp string, handler handler.Handler[T]) {
-	d.AddHandler(handler.Discord(runner, KeyWordRegexp, d.Send))
+func (d *Discord[T]) AddMsgHandler(runner node_runner.Runner, channel, KeyWordRegexp string, handler handler.Handler[T]) {
+	d.AddHandler(handler.Discord(runner, channel, KeyWordRegexp, d.Send))
 }
 
 func (d *Discord[T]) Start() error {
