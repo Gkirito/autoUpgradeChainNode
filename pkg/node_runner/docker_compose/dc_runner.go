@@ -31,11 +31,11 @@ func cmd(name string, args ...string) (string, error) {
 }
 
 func (d DcRunner) Start() (string, error) {
-	return cmd("docker compose", "-f", d.composeFilePath, "up", "-d")
+	return cmd("docker", "compose", "-f", d.composeFilePath, "up", "-d")
 }
 
 func (d DcRunner) Stop() (string, error) {
-	return cmd("docker compose", "-f", d.composeFilePath, "down")
+	return cmd("docker", "compose", "-f", d.composeFilePath, "down")
 }
 
 func (d DcRunner) Upgrade(version string) error {
