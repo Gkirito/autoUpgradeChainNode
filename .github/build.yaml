@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build arm64
+        run: go build -o ./aucn-arm64 ./cmd/aucn.go
+        env:
+          GOARCH: arm64
+          GOOS: linux
+
+      - name: Build amd64
+        run: go build -o ./aucn-amd64 ./cmd/aucn.go
+        env:
+          GOARCH: amd64
+          GOOS: linux
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-result-${{github.sha}}
+          path: |
+            ./aucn-amd64
+            ./aucn-arm64
+          retention-days: 5
