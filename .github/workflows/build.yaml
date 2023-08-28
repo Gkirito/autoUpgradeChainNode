@@ -3,10 +3,13 @@ name: build
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - v*
 
 jobs:
 
   build:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,4 +46,18 @@ jobs:
           path: |
             ./aucn-amd64
             ./aucn-arm64
-          retention-days: 5
+          retention-days: 1
+
+  release:
+    if: startsWith(github.event.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download math result for job 1
+        uses: actions/download-artifact@v3
+        with:
+          name: build-result-${{github.sha}}
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "release.tar.gz,aucn-arm64,aucn-amd64"
