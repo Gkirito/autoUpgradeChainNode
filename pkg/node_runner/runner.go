@@ -9,6 +9,7 @@ type Runner interface {
 	Start() (string, error)
 	Upgrade(name string) error
 	Stop() (string, error)
+	State() (string, error)
 }
 
 type Config interface {

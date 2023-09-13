@@ -41,3 +41,7 @@ func (d DcRunner) Stop() (string, error) {
 func (d DcRunner) Upgrade(version string) error {
 	return update.ChangeYamlFile(version, d.composeFilePath)
 }
+
+func (d DcRunner) State() (string, error) {
+	return cmd("docker", "compose", "ps", "-f", d.composeFilePath)
+}

@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Message interface {
@@ -86,7 +87,7 @@ func MsgHandler[T Message](logger *log.Entry, runner node_runner.Runner, msg T, 
 		send(msg, err.Error())
 		return
 	}
-	msgLogger.Infoln("update success")
+	msgLogger.Infoln("config update success")
 
 	startLog, err := runner.Start()
 	if err != nil {
@@ -103,5 +104,14 @@ func MsgHandler[T Message](logger *log.Entry, runner node_runner.Runner, msg T, 
 		}
 	}
 	send(msg, startLog)
-	msgLogger.Infoln("restart success")
+	msgLogger.Infoln("node restart success")
+
+	time.Sleep(30 * time.Second)
+	state, err := runner.State()
+	if err != nil {
+		msgLogger.Error(err)
+		send(msg, err.Error())
+		return
+	}
+	send(msg, state)
 }
