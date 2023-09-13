@@ -1,1 +1,1 @@
-# autoUpgradeChainNode
+# auto-upgrade-node

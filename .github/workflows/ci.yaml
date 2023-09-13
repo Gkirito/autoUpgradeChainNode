@@ -19,13 +19,13 @@ jobs:
           go-version: '1.20'
 
       - name: Build arm64
-        run: go build -o ./aucn-arm64 ./cmd/aucn.go
+        run: go build -o ./aun-arm64 ./cmd/aun.go
         env:
           GOARCH: arm64
           GOOS: linux
 
       - name: Build amd64
-        run: go build -o ./aucn-amd64 ./cmd/aucn.go
+        run: go build -o ./aun-amd64 ./cmd/aun.go
         env:
           GOARCH: amd64
           GOOS: linux
@@ -53,4 +53,4 @@ jobs:
           name: build-result-${{github.sha}}
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "release.tar.gz,aucn-arm64,aucn-amd64"
+          artifacts: "release.tar.gz,aun-arm64,aun-amd64"
