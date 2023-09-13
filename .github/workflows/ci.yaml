@@ -35,8 +35,8 @@ jobs:
         with:
           name: build-result-${{github.sha}}
           path: |
-            ./aucn-amd64
-            ./aucn-arm64
+            ./aun-amd64
+            ./aun-arm64
           retention-days: 1
 
   release:
