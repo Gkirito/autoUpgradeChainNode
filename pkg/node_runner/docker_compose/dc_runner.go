@@ -43,5 +43,5 @@ func (d DcRunner) Upgrade(version string) error {
 }
 
 func (d DcRunner) State() (string, error) {
-	return cmd("docker", "compose", "ps", "-f", d.composeFilePath)
+	return cmd("docker", "compose", "-f", d.composeFilePath, "ps")
 }
