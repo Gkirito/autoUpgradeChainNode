@@ -108,7 +108,7 @@ func MsgHandler[T Message](logger *log.Entry, runner node_runner.Runner, msg T, 
 
 	time.Sleep(30 * time.Second)
 	state, err := runner.State()
-	if err != nil {
+	if len(state) == 0 && err != nil {
 		msgLogger.Error(err)
 		send(msg, err.Error())
 		return
