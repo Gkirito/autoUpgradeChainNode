@@ -95,10 +95,10 @@ func MsgHandler[T Message](logger *log.Entry, runner node_runner.Runner, msg T, 
 		send(msg, err.Error())
 		return
 	}
-	if len(startLog) >= 4000 {
+	if len(startLog) >= 2000 {
 		runIndex := strings.Index(startLog, "Running")
 		if runIndex == -1 {
-			startLog = startLog[len(startLog)-1-4000:]
+			startLog = startLog[len(startLog)-1-2000:]
 		} else {
 			startLog = startLog[runIndex:]
 		}
